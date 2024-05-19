@@ -1,6 +1,11 @@
 Molecular Activity Prediction and Feature Analysis
 This repository contains scripts for analyzing molecular fingerprints and predicting molecular activity using machine learning algorithms. The analysis involves the use of ECFP04 and ECFP06 fingerprints, and SHAP analysis for feature importance. The workflow is as follows:
 
+Dataset Folder
+Contain ECFP4 and ECFP6 representations 
+
+Implementation folder
+Contains the following codes:
 ECFP04 Analysis (Script 01):
 Objective: Classify molecules as Active or Inactive and predict pxC50 values.
 Method: Use multiple machine learning algorithms to determine the best-performing model.
