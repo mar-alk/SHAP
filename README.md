@@ -55,7 +55,7 @@ Alternatively, you can use conda to create a new environment and install depende
 ```bash
 conda create --name shap_qsar python=3.8
 conda activate shap_qsar
-conda install numpy pandas matplotlib seaborn scikit-learn shap tensorflow catboost
+conda install numpy pandas matplotlib seaborn scikit-learn shap tensorflow catboost rdkit
 ```
 
 ## Dependencies
@@ -70,6 +70,7 @@ The following Python libraries are required for running the notebooks and script
 - `shap`
 - `tensorflow`
 - `catboost`
+- `rdkit`
 
 ## Usage
 
