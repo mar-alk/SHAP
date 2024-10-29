@@ -102,6 +102,16 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
+
+# Load your data
+Data_04 = pd.read_csv(r"data_CHEMBL203-ECFP4.csv") # you can replace with data file path
+X04 = Data_04.drop(['Smiles','pXC50','Class'],axis=1)
+Y04 = Data_04['Class'].values.reshape(-1,1)
+
+#Split data to trainin, validation and testing 
+X_train, X_tes, Y_train, Y_tes = train_test_split(X04, Y04, test_size=0.2,random_state=42)
+X_val, X_test, Y_val, Y_test = train_test_split(X_tes, Y_tes, test_size=0.5,random_state=42)
+
 # Generate predictions on the test dataset
 all_preds = cat_model.predict(X_test)
 
@@ -137,16 +147,17 @@ ind = feature_imp.argsort()[-10:][::-1]  # Sort features by importance
 print("Top 10 Important Features:", np.array(x_df.columns)[ind])
 print("Feature Importance Scores:", feature_imp[ind])
 
+
 ### Traceback of Important ECFP Features to Molecular Substructure
 
 # Select molecule from positive dataset
-a = 1239  # Example index for molecule
+a = 123  # Example index for molecule [ a is molecule index #] Replace as needed 
 smiles = Data_Positive.iloc[a, 0]
 
 # Generate ECFP4 fingerprint and retrieve bit information
 bitinfo = {}
 mol = Chem.MolFromSmiles(smiles)
-fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True)  # ECFP4 fingerprint
+fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True)  # Retrieve ECFP4 fingerprint and ensure that 'bitInfo is NOT set to False' 
 
 # Function to convert ECFP to DataFrame
 def ecfp_to_dataframe(ecfp):
@@ -161,30 +172,24 @@ df = ecfp_to_dataframe(fp)
 print("ECFP4 Fingerprint DataFrame:\n", df)
 
 # Find bits in the fingerprint that are set to 1 (on-bits)
-on_bits = np.where(df.iloc[0, :] == 1)
-print("On-bits in the fingerprint:", on_bits)
+one_bits = np.where(df.iloc[0, :] == 1)
+print("One-bits in the fingerprint:", one_bits)
 
 # Visualize molecular substructure corresponding to a specific ECFP bit
-img = Draw.DrawMorganBit(mol, bit_id=4, bitInfo=bitinfo)  # Example bit ID: 4
+img = Draw.DrawMorganBit(mol, bit_id=4, bitInfo=bitinfo)  # Example bit ID: 4 - Replace as needed to retrieve desired bits substructure 
 img.show()
 
-------------------------------------------------------------------
-## Usage
 
-Once the dependencies are installed, you can run the scripts and notebooks as follows:
+In this example:
+SHAP Analysis: After training the CatBoost model, SHAP is used to analyze the importance of each feature, with a summary plot visualizing the top contributing features.
+Traceback of ECFP Features: Using RDKit, the ECFP4 fingerprint for a molecule is generated, and on-bits are identified. Each on-bit represents a molecular substructure that contributes to the prediction. RDKit’s DrawMorganBit function is then used to visualize the specific substructures for better interpretability.
 
-1. **ECFP4 Analysis (Script 01)**:
-   - Run the `ECFP4 Analysis.ipynb` notebook or corresponding script.
-   - It will classify molecules as Active or Inactive and predict pXC50 values based on ECFP4 fingerprints.
-   - SHAP analysis will provide insights into which molecular features contribute the most to the predicted activity.
 
-2. **ECFP6 Analysis (Script 02)**:
-   - Run the `ECFP6 Analysis.ipynb` notebook or corresponding script.
-   - Similar to the ECFP4 analysis, but using ECFP6 fingerprints for predicting activity and conducting SHAP feature importance analysis.
+### Explanation:
+- **Dependencies**: Updated to include RDKit as it's required for cheminformatics operations.
+- **Usage Example**: Added a practical example that details applying SHAP to a CatBoost model and tracing ECFP features to substructures.
 
-3. **Traceback Molecular Structures (Script 03)**:
-   - Run the `Traceback Molecular Structures.ipynb` notebook or corresponding script.
-   - This script will map SHAP-identified important features back to their corresponding molecular substructures, providing interpretable connections between features and molecular structures.
+
 
 ## SHAP Analysis for Feature Importance
 
