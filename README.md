@@ -77,6 +77,103 @@ The following Python libraries are required for running the notebooks and script
 Once the dependencies are installed, you can run the scripts and notebooks as follows:
 
 1. **ECFP4 Analysis (Script 01)**:
+   - Open the `ECFP4 Analysis.ipynb` notebook or run the corresponding script.
+   - This script classifies molecules as Active or Inactive and predicts their pXC50 values using ECFP4 fingerprints.
+   - SHAP analysis is applied to understand which molecular features most influence the prediction.
+
+2. **ECFP6 Analysis (Script 02)**:
+   - Run the `ECFP6 Analysis.ipynb` notebook or corresponding script.
+   - Similar to the ECFP4 analysis, this script uses ECFP6 fingerprints for predicting activity and conducting SHAP feature importance analysis.
+
+3. **Traceback Molecular Structures (Script 03)**:
+   - Run the `Traceback Molecular Structures.ipynb` notebook or corresponding script.
+   - This script maps SHAP-identified features back to their corresponding molecular substructures for an interpretable connection between features and molecular structures.
+
+### Example: SHAP Analysis with CatBoost for Feature Importance
+
+The following example demonstrates using SHAP with a trained CatBoost model to analyze feature importance and visualize the ECFP fingerprints of a specific molecule.
+
+```python
+# Import required libraries
+import shap
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import AllChem, Draw
+
+# Generate predictions on the test dataset
+all_preds = cat_model.predict(X_test)
+
+# Convert test data to a DataFrame for SHAP analysis
+X_df = pd.DataFrame(X_test)
+
+# Deep copies of data for separate SHAP analysis and plotting
+x_df = X_df.copy(deep=True)
+x_df_1st = x_df.copy(deep=True)
+
+# Store predictions in a separate DataFrame for first SHAP plot
+x_df_1st['Predictions'] = all_preds
+
+# Reset index for consistency in both DataFrames
+x_df = x_df.reset_index(drop=True)
+x_df_1st = x_df_1st.reset_index(drop=True)
+
+# Apply SHAP for feature importance analysis using CatBoost model
+shap_values = shap.TreeExplainer(cat_model).shap_values(x_df)
+
+# Plot summary of SHAP feature importance
+plt.figure(figsize=(10,10))
+shap.summary_plot(shap_values, x_df, plot_size=(10,10), show=False, plot_type='dot', max_display=10)
+plt.title('SHAP Feature Importance for CatBoost', weight='bold', size=20)
+plt.xticks(size=20, weight='bold')
+plt.yticks(size=20, weight='bold')
+plt.savefig('Reg_SHAP_04.png', dpi=100, bbox_inches='tight')
+plt.show()
+
+# Calculate and display top 10 most important features
+feature_imp = np.mean(np.abs(shap_values), axis=0)
+ind = feature_imp.argsort()[-10:][::-1]  # Sort features by importance
+print("Top 10 Important Features:", np.array(x_df.columns)[ind])
+print("Feature Importance Scores:", feature_imp[ind])
+
+### Traceback of Important ECFP Features to Molecular Substructure
+
+# Select molecule from positive dataset
+a = 1239  # Example index for molecule
+smiles = Data_Positive.iloc[a, 0]
+
+# Generate ECFP4 fingerprint and retrieve bit information
+bitinfo = {}
+mol = Chem.MolFromSmiles(smiles)
+fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True)  # ECFP4 fingerprint
+
+# Function to convert ECFP to DataFrame
+def ecfp_to_dataframe(ecfp):
+    arr = np.zeros((1, 1024))
+    for i in ecfp.GetOnBits():
+        arr[0, i] = 1
+    df = pd.DataFrame(arr, columns=[f"Bit_{i}" for i in range(1024)])
+    return df
+
+# Convert ECFP fingerprint to DataFrame for inspection
+df = ecfp_to_dataframe(fp)
+print("ECFP4 Fingerprint DataFrame:\n", df)
+
+# Find bits in the fingerprint that are set to 1 (on-bits)
+on_bits = np.where(df.iloc[0, :] == 1)
+print("On-bits in the fingerprint:", on_bits)
+
+# Visualize molecular substructure corresponding to a specific ECFP bit
+img = Draw.DrawMorganBit(mol, bit_id=4, bitInfo=bitinfo)  # Example bit ID: 4
+img.show()
+
+------------------------------------------------------------------
+## Usage
+
+Once the dependencies are installed, you can run the scripts and notebooks as follows:
+
+1. **ECFP4 Analysis (Script 01)**:
    - Run the `ECFP4 Analysis.ipynb` notebook or corresponding script.
    - It will classify molecules as Active or Inactive and predict pXC50 values based on ECFP4 fingerprints.
    - SHAP analysis will provide insights into which molecular features contribute the most to the predicted activity.
