@@ -125,9 +125,6 @@ x_df_1st = x_df.copy(deep=True)
 # Store predictions in a separate DataFrame for first SHAP plot
 x_df_1st['Predictions'] = all_preds
 
-# Reset index for consistency in both DataFrames
-x_df = x_df.reset_index(drop=True)
-x_df_1st = x_df_1st.reset_index(drop=True)
 
 # Apply SHAP for feature importance analysis using CatBoost model
 shap_values = shap.TreeExplainer(cat_model).shap_values(x_df)
@@ -157,7 +154,8 @@ smiles = Data_Positive.iloc[a, 0]
 # Generate ECFP4 fingerprint and retrieve bit information
 bitinfo = {}
 mol = Chem.MolFromSmiles(smiles)
-fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True)  # Retrieve ECFP4 fingerprint and ensure that 'bitInfo is NOT set to False' 
+fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True)  # Retrieve ECFP4 fingerprint
+# ensure that 'bitInfo is NOT set to False' 
 
 # Function to convert ECFP to DataFrame
 def ecfp_to_dataframe(ecfp):
@@ -171,7 +169,7 @@ def ecfp_to_dataframe(ecfp):
 df = ecfp_to_dataframe(fp)
 print("ECFP4 Fingerprint DataFrame:\n", df)
 
-# Find bits in the fingerprint that are set to 1 (on-bits)
+# Find bits in the fingerprint that are set to 1 (one-bits)
 one_bits = np.where(df.iloc[0, :] == 1)
 print("One-bits in the fingerprint:", one_bits)
 
