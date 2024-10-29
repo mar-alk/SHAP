@@ -112,7 +112,24 @@ Y04 = Data_04['Class'].values.reshape(-1,1)
 X_train, X_tes, Y_train, Y_tes = train_test_split(X04, Y04, test_size=0.2,random_state=42)
 X_val, X_test, Y_val, Y_test = train_test_split(X_tes, Y_tes, test_size=0.5,random_state=42)
 
-# Generate predictions on the test dataset
+
+# Develop and train Catboost model
+params = {'iterations':5000,
+        'learning_rate':0.01,
+        'depth':8,
+        'eval_metric':'R2',
+        'verbose':200,
+        'od_type':"Iter", # overfit detector
+        'od_wait':1000, # most recent best iteration to wait before stopping
+        'random_seed': 8
+          }
+cat_model = CatBoostRegressor(**params)
+cat_model.fit(X_train, Y_train.iloc[:,0],   
+          eval_set=(X_val, Y_val.iloc[:,0]), 
+          use_best_model=True, # True if we don't want to save trees created after iteration with the best validation score
+          plot=True );
+
+# Generate predictions on the test dataset using Catboost model
 all_preds = cat_model.predict(X_test)
 
 # Convert test data to a DataFrame for SHAP analysis
