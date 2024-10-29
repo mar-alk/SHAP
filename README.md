@@ -103,7 +103,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
 
-# Load your data
+# Load your data either (ECFP4 OR ECFP6)
 Data_04 = pd.read_csv(r"data_CHEMBL203-ECFP4.csv") # you can replace with data file path
 X04 = Data_04.drop(['Smiles','pXC50','Class'],axis=1)
 Y04 = Data_04['Class'].values.reshape(-1,1)
@@ -154,8 +154,10 @@ smiles = Data_Positive.iloc[a, 0]
 # Generate ECFP4 fingerprint and retrieve bit information
 bitinfo = {}
 mol = Chem.MolFromSmiles(smiles)
-fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True)  # Retrieve ECFP4 fingerprint
-# ensure that 'bitInfo is NOT set to False' 
+fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024, bitInfo=bitinfo, useFeatures=True) # This line:
+# Retrieve ECFP4 fingerprint
+# For ECFP6: Replace second srgument 2 with 3.
+# Ensure that 'bitInfo is NOT set to False'. 
 
 # Function to convert ECFP to DataFrame
 def ecfp_to_dataframe(ecfp):
@@ -183,14 +185,8 @@ SHAP Analysis: After training the CatBoost model, SHAP is used to analyze the im
 Traceback of ECFP Features: Using RDKit, the ECFP4 fingerprint for a molecule is generated, and on-bits are identified. Each on-bit represents a molecular substructure that contributes to the prediction. RDKit’s DrawMorganBit function is then used to visualize the specific substructures for better interpretability.
 
 
-### Explanation:
-- **Dependencies**: Updated to include RDKit as it's required for cheminformatics operations.
-- **Usage Example**: Added a practical example that details applying SHAP to a CatBoost model and tracing ECFP features to substructures.
-
-
 
 ## SHAP Analysis for Feature Importance
-
 SHAP is utilized in both ECFP4 and ECFP6 analyses to provide interpretability to the model predictions. SHAP values explain the importance of each feature (molecular fingerprint bit) in driving the model's prediction, allowing for a detailed understanding of how molecular structures affect biological activity.
 
 The **Traceback Molecular Structures** script further enhances this by mapping important features identified by SHAP back to the corresponding molecular substructures, offering insight into which specific parts of a molecule contribute to its activity.
