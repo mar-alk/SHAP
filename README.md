@@ -114,6 +114,7 @@ X_val, X_test, Y_val, Y_test = train_test_split(X_tes, Y_tes, test_size=0.5,rand
 
 
 # Develop and train Catboost model
+# Replace with your set of parameters
 params = {'iterations':5000,
         'learning_rate':0.01,
         'depth':8,
@@ -123,7 +124,7 @@ params = {'iterations':5000,
         'od_wait':1000, # most recent best iteration to wait before stopping
         'random_seed': 8
           }
-cat_model = CatBoostRegressor(**params)
+cat_model = CatBoostRegressor(**params)    # Replace with your model e.g. Rf, GBT .. etc.
 cat_model.fit(X_train, Y_train.iloc[:,0],   
           eval_set=(X_val, Y_val.iloc[:,0]), 
           use_best_model=True, # True if we don't want to save trees created after iteration with the best validation score
@@ -145,6 +146,8 @@ x_df_1st['Predictions'] = all_preds
 
 # Apply SHAP for feature importance analysis using CatBoost model
 shap_values = shap.TreeExplainer(cat_model).shap_values(x_df)
+# TreeExplainer is used along with Tree based models (RF and GBT).
+# Alternative Explainer options are avaiable for other models (e.g. KernelExplainer (can work with any ML model) and DeepExplainer (for Deep learning models)).
 
 # Plot summary of SHAP feature importance
 plt.figure(figsize=(10,10))
